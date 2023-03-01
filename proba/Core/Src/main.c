@@ -38,6 +38,16 @@
 
 #define PIN_DUGME GPIOB
 #define DUGME GPIO_PIN_0
+
+#define TIMER_PERIOD_MS 10
+
+TIM_HandleTypeDef htim2;
+
+uint32_t kliknuto_dugme = 0;
+uint32_t ukljucena_dioda = 0;
+uint32_t kliknuto_vreme = 0;
+uint32_t perioda_tajmera = 10; //[ms]
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -77,6 +87,8 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /* USER CODE BEGIN Init */
 
@@ -107,6 +119,7 @@ int main(void)
 
 	  /*
 	   **** U OVOM ZAKOMENTARISANOM DELU NALAZI SE STAVKA (A) ****
+	   *
 	  HAL_Delay(1000);
 	  HAL_GPIO_TogglePin(PIN_DIODE, CRVENO);
 
@@ -114,6 +127,12 @@ int main(void)
 	  HAL_GPIO_TogglePin(PIN_DIODE, CRVENO);
 	  */
 
+	  if (ukljucena_dioda){
+		  HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_RESET)
+	  }
+	  else{
+		  HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_SET)
+	  }
 
 
 
@@ -212,7 +231,12 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+
+
+/*
+ ****** U OVOM ZAKOMENTARISANOM DELU NALAZI SE EXTI FUNKCIJA TACKE (B) ******
+ *
+ *  void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 
   if(GPIO_Pin == GPIO_PIN_0) {
@@ -225,8 +249,44 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   } else {
 	  HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_SET);
   }
+} */
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+
+  if(GPIO_Pin == GPIO_PIN_0) {
+
+	  if(HAL_GPIO_ReadPin(PIN_DUGME, DUGME) == GPIO_PIN_RESET){
+		  kliknuto_dugme = 1;
+	  }
+  }
+
+  else {
+	  kliknuto_dugme = 0;
+	  ukljucena_dioda = 0;
+  }
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+
+	if(htim->Instance == TIM2){
+
+		if(kliknuto_dugme){
+			kliknuto_vreme += 10;
+
+			if(kliknuto_vreme >= 2000){
+				ukljucena_dioda = 1;
+			}
+
+			else{
+				ukljucena_dioda = 0;
+			}
+		}
+
+	}
+
+}
 /* USER CODE END 4 */
 
 /**
