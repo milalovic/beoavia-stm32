@@ -41,7 +41,6 @@
 
 #define TIMER_PERIOD_MS 10
 
-TIM_HandleTypeDef htim2;
 
 uint32_t kliknuto_dugme = 0;
 uint32_t ukljucena_dioda = 0;
@@ -87,8 +86,6 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /* USER CODE BEGIN Init */
 
@@ -109,6 +106,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_SET);
   while (1)
   {
@@ -117,22 +115,14 @@ int main(void)
 	  HAL_GPIO_WritePin(PIN_DIODE, ZELENO, GPIO_PIN_SET);
 	  HAL_GPIO_WritePin(PIN_DIODE, CRVENO, GPIO_PIN_SET);
 
-	  /*
-	   **** U OVOM ZAKOMENTARISANOM DELU NALAZI SE STAVKA (A) ****
-	   *
-	  HAL_Delay(1000);
+
+	  HAL_Delay(500);
 	  HAL_GPIO_TogglePin(PIN_DIODE, CRVENO);
 
-	  HAL_Delay(1000);
+	  HAL_Delay(500);
 	  HAL_GPIO_TogglePin(PIN_DIODE, CRVENO);
-	  */
 
-	  if (ukljucena_dioda){
-		  HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_RESET)
-	  }
-	  else{
-		  HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_SET)
-	  }
+
 
 
 
@@ -219,8 +209,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : PB0 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
@@ -233,23 +223,6 @@ static void MX_GPIO_Init(void)
 
 
 
-/*
- ****** U OVOM ZAKOMENTARISANOM DELU NALAZI SE EXTI FUNKCIJA TACKE (B) ******
- *
- *  void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
-{
-
-  if(GPIO_Pin == GPIO_PIN_0) {
-
-	  if(HAL_GPIO_ReadPin(PIN_DUGME, DUGME) == GPIO_PIN_RESET){
-
-		  HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_RESET);
-	  }
-
-  } else {
-	  HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_SET);
-  }
-} */
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -257,36 +230,20 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   if(GPIO_Pin == GPIO_PIN_0) {
 
 	  if(HAL_GPIO_ReadPin(PIN_DUGME, DUGME) == GPIO_PIN_RESET){
-		  kliknuto_dugme = 1;
+		  HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_SET);
 	  }
-  }
 
-  else {
-	  kliknuto_dugme = 0;
-	  ukljucena_dioda = 0;
+	  else
+	  {
+	  		  HAL_GPIO_WritePin(PIN_DIODE, ZUTO, GPIO_PIN_RESET);
+	  }
+
   }
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
 
-	if(htim->Instance == TIM2){
 
-		if(kliknuto_dugme){
-			kliknuto_vreme += 10;
 
-			if(kliknuto_vreme >= 2000){
-				ukljucena_dioda = 1;
-			}
-
-			else{
-				ukljucena_dioda = 0;
-			}
-		}
-
-	}
-
-}
 /* USER CODE END 4 */
 
 /**
