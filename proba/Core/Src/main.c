@@ -119,11 +119,11 @@ int main(void)
 	  HAL_GPIO_WritePin(PIN_DIODE, CRVENO, GPIO_PIN_SET);
 
 
-	  /*HAL_Delay(500);
+	  HAL_Delay(500);
 	  HAL_GPIO_TogglePin(PIN_DIODE, CRVENO);
 
 	  HAL_Delay(500);
-	  HAL_GPIO_TogglePin(PIN_DIODE, CRVENO);*/
+	  HAL_GPIO_TogglePin(PIN_DIODE, CRVENO);
 
 
 
